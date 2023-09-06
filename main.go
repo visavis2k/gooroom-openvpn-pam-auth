@@ -31,9 +31,6 @@ func main() {
 	logger.Debug(r.username)
 	logger.Debug(r.password)
 
-	os.Setenv("USERNAME", r.username)
-	os.Setenv("PASSWORD", r.password)
-
 	c := exec.Command("/usr/bin/bash", "-c", "/usr/sbin/openvpn --config /etc/openvpn/client/gooroom.ovpn --auth-user-pass <(echo -e \""+r.username+"\n"+r.password+"\")")
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
