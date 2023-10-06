@@ -1,8 +1,9 @@
 module gooroom-openvpn-pam-auth
 
-go 1.21.0
+go 1.20
 
 require github.com/hashicorp/go-hclog v1.5.0
+require github.com/spf13/viper v1.16.0
 
 require (
 	github.com/fatih/color v1.13.0 // indirect
