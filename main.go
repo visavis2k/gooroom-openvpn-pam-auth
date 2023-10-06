@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-hclog"
+	"github.com/spf13/viper"
 )
 
 var logger hclog.Logger
@@ -19,19 +20,27 @@ func main() {
 	r.service = os.Getenv("PAM_SERVICE")
 	r.username = os.Getenv("PAM_USER")
 
+	logger.Debug("===============================")
 	logger.Debug("Start: gooroom-pam-openvpn-auth")
+	logger.Debug("===============================")
+
+	viper.SetConfigFile("/etc/gooroom/gooroom-client-server-register/gcsr.conf")
+	viper.SetConfigType("props")
+	viper.SetDefault("vpn_config", "/etc/openvpn/client/gooroom.ovpn")
+
+	if err := viper.ReadInConfig(); err != nil {
+		logger.Error("Error loading config", "error", err)
+		os.Exit(5)
+	}
+
+	configFile := viper.GetString("vpn_config")
 
 	if err := r.getPassword(); err != nil {
-		logger.Debug("Error reading password", "error", err)
+		logger.Error("Error reading password", "error", err)
 		os.Exit(2)
 	}
 
-	logger.Debug("========================================")
-	logger.Debug(r.service)
-	logger.Debug(r.username)
-	logger.Debug(r.password)
-
-	c := exec.Command("/usr/bin/bash", "-c", "/usr/sbin/openvpn --config /etc/openvpn/client/gooroom.ovpn --auth-user-pass <(echo -e \""+r.username+"\n"+r.password+"\")")
+	c := exec.Command("/usr/bin/bash", "-c", "/usr/sbin/openvpn --config "+configFile+" --auth-user-pass <(echo -e \""+r.username+"\n"+r.password+"\")")
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
 
@@ -46,7 +55,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Debug("End")
+	logger.Debug("=============================")
+	logger.Debug("End: gooroom-pam-openvpn-auth")
+	logger.Debug("=============================")
 
 	os.Exit(0)
 }
