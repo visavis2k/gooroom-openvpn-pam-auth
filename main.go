@@ -29,8 +29,12 @@ func main() {
 	viper.SetDefault("vpn_config", "/etc/openvpn/client/gooroom.ovpn")
 
 	if err := viper.ReadInConfig(); err != nil {
-		logger.Error("Error loading config", "error", err)
-		os.Exit(5)
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// ignore
+		} else {
+			logger.Error("Error loading config", "error", err)
+			os.Exit(5)
+		}
 	}
 
 	configFile := viper.GetString("vpn_config")
