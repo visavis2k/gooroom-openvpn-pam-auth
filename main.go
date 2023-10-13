@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"strings"
@@ -29,7 +30,9 @@ func main() {
 	viper.SetDefault("vpn_config", "/etc/openvpn/client/gooroom.ovpn")
 
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		if _, ok := err.(*fs.PathError); ok {
+			// ignore
+		} else if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// ignore
 		} else {
 			logger.Error("Error loading config", "error", err)
